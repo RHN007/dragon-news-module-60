@@ -1,14 +1,14 @@
 import React, { useContext, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
+import { Link } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthProvider/AuthProvider';
 
 const Register = () => {
     const [error, setError] = useState('')
-    
-    const {createUser} = useContext(AuthContext)
-    
-
+    const [accepted, setAccepted] = useState(false)
+    const {createUser, updateUserProfile} = useContext(AuthContext)
+  
     const handleSubmit = event => {
         event.preventDefault()
         const form = event.target; 
@@ -22,12 +22,28 @@ const Register = () => {
             const user = result.user; 
             setError('')
             form.reset()
+            handleUpdateUserProfile(name, photoURL)
         })
         .catch(e => {
             console.error(e); 
             setError(e.message)
         })
     }
+    const handleAccepted = event => {
+      setAccepted(event.target.checked)
+    }
+
+    const handleUpdateUserProfile = (name, photoURL) => {
+      const profile = {
+        displayName : name, 
+        photoURL: photoURL
+      }
+      updateUserProfile(profile)
+      .then(() => {})
+      .catch(error => console.error(error))
+    }
+
+
     return (
         <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3" controlId="formBasicName">
@@ -47,8 +63,13 @@ const Register = () => {
           <Form.Label>Password</Form.Label>
           <Form.Control name="password" type="password" placeholder="Password" />
         </Form.Group>
-        <Button variant="primary" type="submit">
-            Login
+        <Form.Group className="mb-3" controlId="formBasicCheckbox">
+        <Form.Check type="checkbox" 
+        onClick={handleAccepted}
+        label={<>Accept <Link to='/terms'>Terms & Conditions</Link></>} />
+      </Form.Group>
+        <Button variant="primary" type="submit" disabled={!accepted}>
+            Register
         </Button>
         <Form.Text className="text-danger">
             {error}
